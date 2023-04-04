@@ -20,16 +20,63 @@ const Register = ({navigation}: RegisterProps) => {
     password: '',
     confirmPassword: '',
   });
-  const onSubmit = () => {
-    const {email, password} = registerFormData;
-    dispatch(register({email, password}));
-  };
+
+  const [error, setErrors] = useState<RegisterFormData>({
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
 
   const onChange = (entityName: string, text: string) => {
     setRegisterFormData({
       ...registerFormData,
       [entityName]: text.trim(),
     });
+    setErrors({
+      ...error,
+      [entityName]: '',
+    });
+  };
+  const validateUserData = () => {
+    let emailError = '',
+      passwordError = '',
+      confirmPasswordError = '';
+    const emailReg = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
+    if (
+      registerFormData.email === '' ||
+      !emailReg.test(registerFormData.email)
+    ) {
+      emailError = 'Please Enter valid Email';
+    }
+    if (registerFormData.password === '') {
+      passwordError = 'Please Enter Password';
+    }
+    if (registerFormData.confirmPassword === '') {
+      confirmPasswordError = 'Please Enter confirm password';
+    }
+    if (registerFormData.password !== registerFormData.confirmPassword) {
+      passwordError = 'Password dont match';
+      confirmPasswordError = 'Password dont match';
+    }
+    setErrors({
+      email: emailError,
+      password: passwordError,
+      confirmPassword: confirmPasswordError,
+    });
+    if (
+      emailError !== '' ||
+      passwordError !== '' ||
+      confirmPasswordError !== ''
+    ) {
+      return false;
+    }
+    return true;
+  };
+  const onSubmit = () => {
+    if (validateUserData()) {
+      const {email, password} = registerFormData;
+      dispatch(register({email, password}));
+    }
   };
 
   return (
@@ -43,11 +90,13 @@ const Register = ({navigation}: RegisterProps) => {
           onChangeText={text => onChange('email', text)}
           value={registerFormData.email}
           keyboardType="email-address"
-          // error={invalid}
+          error={error.email !== '' ? true : false}
         />
-        {/* <HelperText type="error" visible={hasErrors('email')}>
-          Please Enter a valid email
-        </HelperText> */}
+        {error.email !== '' && (
+          <HelperText type="error" visible={error.email !== '' ? true : false}>
+            {error.email}
+          </HelperText>
+        )}
       </View>
       <View style={styles.input}>
         <TextInput
@@ -56,13 +105,15 @@ const Register = ({navigation}: RegisterProps) => {
           onChangeText={text => onChange('password', text)}
           value={registerFormData.password}
           secureTextEntry
-          // error={invalid}
+          error={error.password !== '' ? true : false}
         />
-        {/* {invalid && (
-          <HelperText type="error" visible={invalid}>
-            {error?.message}
+        {error.password !== '' && (
+          <HelperText
+            type="error"
+            visible={error.password !== '' ? true : false}>
+            {error.password}
           </HelperText>
-        )} */}
+        )}
       </View>
       <View style={styles.input}>
         <TextInput
@@ -71,8 +122,15 @@ const Register = ({navigation}: RegisterProps) => {
           onChangeText={text => onChange('confirmPassword', text)}
           value={registerFormData.confirmPassword}
           secureTextEntry
-          // error={invalid}
+          error={error.confirmPassword !== '' ? true : false}
         />
+        {error.confirmPassword !== '' && (
+          <HelperText
+            type="error"
+            visible={error.confirmPassword !== '' ? true : false}>
+            {error.confirmPassword}
+          </HelperText>
+        )}
       </View>
       <View style={styles.row}>
         <Text>Already have an account?</Text>

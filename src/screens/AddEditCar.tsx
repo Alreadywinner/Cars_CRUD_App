@@ -24,6 +24,13 @@ const AddEditCar = ({navigation, route}: AddEditCarProps) => {
     category: '',
     registrationNo: '',
   });
+  const [error, setErrors] = useState<Car>({
+    color: '',
+    model: '',
+    make: '',
+    category: '',
+    registrationNo: '',
+  });
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
   const dispatch = useAppDispatch();
@@ -33,15 +40,58 @@ const AddEditCar = ({navigation, route}: AddEditCarProps) => {
       ...carInfo,
       [entityName]: text,
     });
+    setErrors({
+      ...error,
+      [entityName]: '',
+    });
+  };
+  const validateCarData = () => {
+    let colorError = '',
+      modelError = '',
+      makeError = '',
+      categoryError = '',
+      regNoError = '';
+
+    if (carInfo.color === '') {
+      colorError = 'Please Enter Color';
+    }
+    if (carInfo.model === '') {
+      modelError = 'Please Enter Model';
+    }
+    if (carInfo.make === '') {
+      makeError = 'Please Enter Make';
+    }
+    if (carInfo.category === '') {
+      categoryError = 'Please Enter Category';
+    }
+    if (carInfo.registrationNo === '') {
+      regNoError = 'Please Enter registration No';
+    }
+    setErrors({
+      category: categoryError,
+      registrationNo: regNoError,
+      make: makeError,
+      model: modelError,
+      color: colorError,
+    });
+    if (
+      categoryError !== '' ||
+      regNoError !== '' ||
+      makeError !== '' ||
+      modelError !== '' ||
+      colorError !== ''
+    ) {
+      return false;
+    }
+    return true;
   };
   const onSubmit = () => {
-    // const {data} =
-    if (params?.index) {
-      dispatch(updateCar({index: params?.index, ...carInfo}));
-    } else {
-      dispatch(addCar(carInfo));
+    if (validateCarData()) {
+      params?.index
+        ? dispatch(updateCar({index: params?.index, ...carInfo}))
+        : dispatch(addCar(carInfo));
+      navigation.goBack();
     }
-    navigation.goBack();
   };
 
   useEffect(() => {
@@ -67,27 +117,27 @@ const AddEditCar = ({navigation, route}: AddEditCarProps) => {
           mode="outlined"
           onChangeText={text => onChange('color', text)}
           value={carInfo.color}
-          // error={invalid}
+          error={error.color !== '' ? true : false}
         />
-        {/* {invalid && (
-              <HelperText type="error" visible={invalid}>
-                {error?.message}
-              </HelperText>
-            )} */}
+        {error.color !== '' && (
+          <HelperText type="error" visible={error.color !== '' ? true : false}>
+            {error.color}
+          </HelperText>
+        )}
       </View>
       <View style={styles.input}>
         <TextInput
           label="Make"
           mode="outlined"
-          // onChangeText={onChange}
+          onChangeText={text => onChange('make', text)}
           value={carInfo.make}
-          // error={invalid}
+          error={error.make !== '' ? true : false}
         />
-        {/* {invalid && (
-              <HelperText type="error" visible={invalid}>
-                {error?.message}
-              </HelperText>
-            )} */}
+        {error.make !== '' && (
+          <HelperText type="error" visible={error.make !== '' ? true : false}>
+            {error.make}
+          </HelperText>
+        )}
       </View>
       <View style={styles.input}>
         <TextInput
@@ -95,13 +145,13 @@ const AddEditCar = ({navigation, route}: AddEditCarProps) => {
           mode="outlined"
           onChangeText={text => onChange('model', text)}
           value={carInfo.model}
-          // error={invalid}
+          error={error.model !== '' ? true : false}
         />
-        {/* {invalid && (
-              <HelperText type="error" visible={invalid}>
-                {error?.message}
-              </HelperText>
-            )} */}
+        {error.model !== '' && (
+          <HelperText type="error" visible={error.model !== '' ? true : false}>
+            {error.model}
+          </HelperText>
+        )}
       </View>
       <Menu
         visible={visible}
@@ -114,8 +164,7 @@ const AddEditCar = ({navigation, route}: AddEditCarProps) => {
               editable={false}
               onPressIn={openMenu}
               value={carInfo.category}
-              // error={invalid}
-              // right={<TextInput.Icon onPress={openMenu} icon="eye" />}
+              error={error.category !== '' ? true : false}
             />
           </Pressable>
         }>
@@ -134,19 +183,26 @@ const AddEditCar = ({navigation, route}: AddEditCarProps) => {
           />
         ))}
       </Menu>
+      {error.category !== '' && (
+        <HelperText type="error" visible={error.category !== '' ? true : false}>
+          {error.category}
+        </HelperText>
+      )}
       <View style={styles.input}>
         <TextInput
           label="Registration No"
           mode="outlined"
           onChangeText={text => onChange('registrationNo', text)}
           value={carInfo.registrationNo}
-          // error={invalid}
+          error={error.registrationNo !== '' ? true : false}
         />
-        {/* {invalid && (
-              <HelperText type="error" visible={invalid}>
-                {error?.message}
-              </HelperText>
-            )} */}
+        {error.registrationNo !== '' && (
+          <HelperText
+            type="error"
+            visible={error.registrationNo !== '' ? true : false}>
+            {error.registrationNo}
+          </HelperText>
+        )}
       </View>
       <Button mode="contained" onPress={() => onSubmit()} style={styles.button}>
         Submit
